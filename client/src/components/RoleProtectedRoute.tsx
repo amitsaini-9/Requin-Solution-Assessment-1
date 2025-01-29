@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { hasAccess } from "@/utils/auth";
+import { API_URL } from "@/config/api";
+import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
 
 interface RoleProtectedRouteProps {
@@ -17,43 +18,48 @@ export default function RoleProtectedRoute({
   const router = useRouter();
   const { toast } = useToast();
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      toast({
-        variant: "destructive",
-        title: "Access Denied",
-        description: "Please login to continue",
-      });
-      router.push("/login");
-      return;
-    }
+    const verifyAccess = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast({
+          variant: "destructive",
+          title: "Access Denied",
+          description: "Please login to continue",
+        });
+        router.push("/login");
+        return;
+      }
 
-    try {
-      const base64Url = token.split(".")[1];
-      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-      const payload = JSON.parse(window.atob(base64));
+      try {
+        // Verify token and role
+        const response = await axios.get(
+          `${API_URL}/api/${requiredRole.toLowerCase()}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
-      if (!hasAccess(payload.role, requiredRole)) {
+        // Get user role from token
+        const base64Url = token.split(".")[1];
+        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+        const payload = JSON.parse(window.atob(base64));
+        setUserRole(payload.role);
+
+        setIsAuthorized(true);
+      } catch (error) {
         toast({
           variant: "destructive",
           title: "Access Denied",
           description: "You don't have permission to access this page",
         });
         router.push("/");
-        return;
       }
+    };
 
-      setIsAuthorized(true);
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Authentication Error",
-        description: "Please login again",
-      });
-      router.push("/login");
-    }
+    verifyAccess();
   }, [requiredRole, router, toast]);
 
   if (!isAuthorized) {

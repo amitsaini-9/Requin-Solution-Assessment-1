@@ -1,9 +1,24 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
 interface RoleIndicatorProps {
-  userRole: string;
   pageRole: string;
 }
 
-export function RoleIndicator({ userRole, pageRole }: RoleIndicatorProps) {
+export function RoleIndicator({ pageRole }: RoleIndicatorProps) {
+  const [userRole, setUserRole] = useState<string>("");
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      const base64Url = token.split(".")[1];
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const payload = JSON.parse(window.atob(base64));
+      setUserRole(payload.role);
+    }
+  }, []);
+
   return (
     <div className="mb-6 p-4 bg-muted rounded-lg">
       <h2 className="text-lg font-semibold mb-2">Access Information</h2>

@@ -7,7 +7,7 @@ export default function EditorDashboard() {
   return (
     <RoleProtectedRoute requiredRole="Editor">
       <div className="space-y-6">
-        <RoleIndicator userRole="Editor" pageRole="Editor Dashboard" />
+        <RoleIndicator pageRole="Editor Dashboard" />
       </div>
     </RoleProtectedRoute>
   );

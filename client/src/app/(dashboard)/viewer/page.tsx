@@ -24,7 +24,7 @@ export default function ViewerDashboard() {
 
   return (
     <div className="space-y-6">
-      <RoleIndicator userRole={userRole} pageRole="Viewer Dashboard" />
+      <RoleIndicator pageRole="Viewer Dashboard" />
     </div>
   );
 }

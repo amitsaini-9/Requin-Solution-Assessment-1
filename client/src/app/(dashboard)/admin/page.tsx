@@ -7,7 +7,7 @@ export default function AdminDashboard() {
   return (
     <RoleProtectedRoute requiredRole="Admin">
       <div className="space-y-6">
-        <RoleIndicator userRole="Admin" pageRole="Admin Dashboard" />
+        <RoleIndicator pageRole="Admin Dashboard" />
       </div>
     </RoleProtectedRoute>
   );

@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { API_URL } from "@/config/api";
 
 const RegisterForm = () => {
   const [username, setUsername] = useState("");
@@ -46,7 +47,7 @@ const RegisterForm = () => {
 
     setIsLoading(true);
     try {
-      await axios.post("http://localhost:3001/auth/register", {
+      await axios.post(`${API_URL}/auth/register`, {
         username,
         password,
         role,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -12,40 +12,27 @@ import {
 import { MenuIcon, MoonIcon, SunIcon, LogOut } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import { hasAccess } from "@/utils/auth";
+
 function MobileNavbar() {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const { theme, setTheme } = useTheme();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
   const router = useRouter();
-  const pathname = usePathname();
 
-  // Check auth status whenever the component mounts or pathname changes
   useEffect(() => {
-    checkAuthStatus();
-  }, [pathname]);
-
-  const checkAuthStatus = () => {
     const token = localStorage.getItem("token");
     if (token) {
-      try {
-        const base64Url = token.split(".")[1];
-        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-        const payload = JSON.parse(window.atob(base64));
-        setIsLoggedIn(true);
-        setUserRole(payload.role);
-      } catch (error) {
-        // If token is invalid, clear it
-        handleLogout();
-      }
-    } else {
-      setIsLoggedIn(false);
-      setUserRole(null);
+      const base64Url = token.split(".")[1];
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const payload = JSON.parse(window.atob(base64));
+      setIsLoggedIn(true);
+      setUserRole(payload.role);
     }
-  };
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -57,7 +44,6 @@ function MobileNavbar() {
 
   return (
     <div className="flex md:hidden items-center space-x-2">
-      {/* ... theme toggle button */}
       <Button
         variant="ghost"
         size="icon"
@@ -84,15 +70,12 @@ function MobileNavbar() {
             )}
           </SheetHeader>
           <nav className="flex flex-col space-y-4 mt-6">
-            {/* ... Home button */}
             <Button
               variant="ghost"
               className="flex items-center gap-3 justify-start border"
               asChild
             >
-              <Link href="/" onClick={() => setShowMobileMenu(false)}>
-                Home
-              </Link>
+              <Link href="/">Home</Link>
             </Button>
 
             {isLoggedIn ? (
@@ -128,18 +111,19 @@ function MobileNavbar() {
                   </Button>
                 )}
 
-                {/* Viewer dashboard is accessible to all roles */}
-                <Button
-                  variant="ghost"
-                  className="flex items-center gap-3 justify-start border"
-                  onClick={() => {
-                    router.push("/viewer");
-                    setShowMobileMenu(false);
-                  }}
-                >
-                  Viewer Dashboard
-                </Button>
-                {/* ... Logout button */}
+                {hasAccess(userRole, "Viewer") && (
+                  <Button
+                    variant="ghost"
+                    className="flex items-center gap-3 justify-start border"
+                    onClick={() => {
+                      router.push("/viewer");
+                      setShowMobileMenu(false);
+                    }}
+                  >
+                    Viewer Dashboard
+                  </Button>
+                )}
+
                 <Separator className="my-2" />
 
                 <Button
@@ -152,28 +136,20 @@ function MobileNavbar() {
                 </Button>
               </>
             ) : (
-              // ... Login/Register buttons
               <>
                 <Button
                   variant="ghost"
                   className="flex items-center gap-3 justify-start border"
                   asChild
                 >
-                  <Link href="/login" onClick={() => setShowMobileMenu(false)}>
-                    Login
-                  </Link>
+                  <Link href="/login">Login</Link>
                 </Button>
                 <Button
                   variant="ghost"
                   className="flex items-center gap-3 justify-start border"
                   asChild
                 >
-                  <Link
-                    href="/register"
-                    onClick={() => setShowMobileMenu(false)}
-                  >
-                    Register
-                  </Link>
+                  <Link href="/register">Register</Link>
                 </Button>
               </>
             )}

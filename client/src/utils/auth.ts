@@ -11,17 +11,16 @@ export const getTokenPayload = () => {
   }
 };
 
-export const hasAccess = (requiredRole: string): boolean => {
-  const payload = getTokenPayload();
-  if (!payload) return false;
+export const hasAccess = (userRole: string | null, requiredRole: string): boolean => {
+  if (!userRole) return false;
 
   switch (requiredRole) {
     case 'Admin':
-      return payload.role === 'Admin';
+      return userRole === 'Admin';
     case 'Editor':
-      return ['Admin', 'Editor'].includes(payload.role);
+      return ['Admin', 'Editor'].includes(userRole);
     case 'Viewer':
-      return ['Admin', 'Editor', 'Viewer'].includes(payload.role);
+      return ['Admin', 'Editor', 'Viewer'].includes(userRole);
     default:
       return false;
   }
